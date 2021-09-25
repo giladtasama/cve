@@ -2,6 +2,7 @@ from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 from colorama import Fore, Style
 
+
 # change the color of the text
 def check_level_cve(text):
     if 'CRITICAL' in text:
@@ -15,7 +16,9 @@ def check_level_cve(text):
     else:
         pass
 
-s= HTMLSession()
+
+s = HTMLSession()
+
 
 def find_cve():
     while True:
@@ -25,12 +28,13 @@ def find_cve():
             break
         elif arsenal.strip().upper() == 'E':
             user_input = input('enter cve: ')
-            url = 'https://nvd.nist.gov/vuln/search/results?form_type=Basic&results_type=overview&query={}&search_type=all&isCpeNameSearch=false'.format(
-                user_input)
+            url = 'https://nvd.nist.gov/vuln/search/results?form_type=Basic&results_' \
+                  'type=overview&query={}&search_type=all&isCpeNameSearch=false'.format(user_input)
             request = s.get(url)
             soup = BeautifulSoup(request.text, 'html.parser')
 
-            search_results = soup.find('div', id='vulnerability-search-results-div').find('table', {'class': 'table table-striped table-hover'}).tbody.contents
+            search_results = soup.find('div', id='vulnerability-search-results-div').find('table',
+                                     {'class':'table table-striped table-hover'}).tbody.contents
             resulte = {}
             for line in search_results:
                 if line == '\n':
@@ -60,6 +64,7 @@ def find_cve():
                 secend_request = s.get(url)
                 page = BeautifulSoup(secend_request.text, 'html.parser')
                 # try to find cwe detiles
+                # noinspection PyBroadException
                 try:
                     cwe = page.find('div', {'id': 'vulnTechnicalDetailsDiv'}).tbody.tr.findChildren()
                     cwe_id = 'cwe_id: {}'.format(cwe[0].a.string)
@@ -77,22 +82,24 @@ def find_cve():
                     resulte[cve_name].append(cwe_id)
                     resulte[cve_name].append(cwe_name)
                     resulte[cve_name].append('cwe link not found')
-            #printing cve & cwe info
+            # printing cve & cwe info
             for cve, cve_detile in reversed(resulte.items()):
-                resulte[cve_name][2] = 'url info: ' +resulte[cve_name][2]
+                resulte[cve_name][2] = 'url info: ' + resulte[cve_name][2]
                 cve_detile[0] = check_level_cve(cve_detile[0])
-                print(cve, '\n', cve_detile[0], '\n', cve_detile[1], '\n', cve_detile[2], '\n', cve_detile[3] ,'\n', cve_detile[4] ,'\n', cve_detile[5] ,'\n', cve_detile[6])
+                print(cve, '\n', cve_detile[0], '\n', cve_detile[1], '\n', cve_detile[2], '\n', cve_detile[3], '\n',
+                      cve_detile[4], '\n', cve_detile[5], '\n', cve_detile[6])
 
-                print('=====================================================================================================================================================')
+                print('============================================================================================='
+                      '========================================================')
 
         else:
             print(Fore.RED + 'incorrect value')
             print(Style.RESET_ALL)
 
 
-
 def main():
-    y = find_cve()
+    find_cve()
+
 
 if __name__ == '__main__':
-     main()
+    main()
